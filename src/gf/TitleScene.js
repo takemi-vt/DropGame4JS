@@ -5,20 +5,38 @@ class TitleScene extends Scene {
 	add = 0;
 	step = 0;
 	mode = 0;
-	btn  = 0;
+
+	/**
+	 * ボタンのイメージリソースハンドル番号
+	 */
+	btn  = -1;
+
+	/**
+	 * ロゴのイメージのリソースハンドル番号
+	 */
+	logo  = -1;
 
 	constructor() {
 		super();
-		this.add = 255 / 1000;
+		this.add = 1.0 / 500;
 		this.btn = this.addResImage('./img/btnSpace.png');
+		this.logo = this.addResImage('./img/title_logo.png');
 	}
 
 	timerProc() {
-		this.step ++;
 		switch( this.mode ) {
 			case 0:
-				if( this.step > 1000 ) {
+				this.step ++;
+				if( this.step > 500 ) {
 					this.mode = 1;
+					this.step = 0;
+				}
+				break;
+
+			case 1:
+				this.step ++;
+				if( this.step > 250 ) {
+					this.step -= 250;
 				}
 				break;
 		}
@@ -36,25 +54,50 @@ class TitleScene extends Scene {
 		}
 	}
 
-	start_fede( context ) {
-		let cl = Number( this.add * this.step );
-		context.fillStyle = "rgb( " + cl + "," + cl + "," + cl + " )";
-		context.fillRect(0,0,this.width,this.height);
-
-		context.font = "50px MeirioUi";
-		context.fillStyle = "black";
-		context.fillText("落ちゲー", 50, 80);
+	keydown( event ) {
+		console.log( event );
+		if( this.mode == 1 ) {
+			if( event.code == "Space" ) {
+				//次のシーンへ移動
+				//gf.setScene( new GameScene() );
+			}
+		}
 	}
 
+	/**
+	 * mode = 0 の描画処理
+	 * @param {*} context 
+	 */
+	start_fede( context ) {
+		//白塗り初期化
+		context.fillStyle = "white";
+		context.fillRect(0,0,this.width,this.height);
+
+		context.globalAlpha =  this.add * this.step;
+		let logo = this.getResImage( this.logo );
+		context.drawImage( logo, 320-161, 25 );
+
+	}
+
+	/**
+	 * mode = 1の描画処理
+	 * @param {*} context 
+	 */
 	button_wait( context ) {
 		context.fillStyle = "white";
 		context.fillRect( 0, 0, this.width, this.height );
 
-		context.font = "50px MeirioUi";
-		context.fillStyle = "black";
-		context.fillText("落ちゲー", 50, 80);
-	
-		let imt = this.getResImage( this.btn );
-		context.drawImage( imt, 50, 90 );
+		context.globalAlpha = 1.0;
+		context.drawImage( this.getResImage( this.logo ), 320-161, 25 );
+
+		context.font = "16px MeirioUi";
+		context.fillStyle = "rgb(80,80,80)";
+		context.fillText("©2020 Vtuber 健巳", 30, 460);
+
+		if( this.step < 125  ) {
+			let imt = this.getResImage( this.btn );
+			context.drawImage( imt, 320-50, 240 );
+		}
 	}
+
 }

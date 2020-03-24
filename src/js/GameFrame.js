@@ -9,6 +9,7 @@ class GameFrame {
 	scene = null;
 
 	constructor( scene ) {
+		//const dpr = window.devicePixelRatio || 1;
 		this.screen = document.getElementById('game_display');
 		this.buf = document.getElementById('buff');
 		this.setScene( scene );
@@ -30,7 +31,9 @@ class GameFrame {
 	}
 
 	keydown( event ){
-
+		if( this.scene ) {
+			this.scene.keydown( event );
+		}
 	}
 
 	timerProc() {
@@ -63,6 +66,15 @@ function AnimeEvent() {
 	requestAnimationFrame( AnimeEvent );
 }
 
+function KeyDown( event ) {
+	if( gf ) {
+		gf.keydown( event );
+	}
+}
+
 //タイマーイベントスタート
 TimerEvent();
 AnimeEvent();
+
+//キーボードイベント
+document.onkeydown = KeyDown;

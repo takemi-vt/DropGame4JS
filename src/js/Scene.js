@@ -67,7 +67,7 @@ class Scene {
 
 	}
 
-	keydown() {
+	keydown( event ) {
 
 	}
 
