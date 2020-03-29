@@ -1,10 +1,15 @@
 /**
  * ゲームシーン
+ * TODO:ゲームーオーバー処理
+ * TODO:LINE消し判定に違和感あり
+ * TODO:LINE消し処理時に両端の描画に残像が残る(特に上の箇所)
+ * TODO:LINE消し処理後に両端のブロック移動判定にブロックがめり込む不具合あり
  */
 const game_mode_first = 0;
 const game_mode_wait = 1;
 const game_mode_countdown = 2;
 const game_mode_play = 3;
+const game_mode_gameover = 4;
 class GameScene extends Scene {
 	step = 0;
 	mode = 0;
@@ -25,6 +30,11 @@ class GameScene extends Scene {
 	 */
 	player = null;
 
+	/**
+	 * フィールド
+	 */
+	field = null;
+
 	constructor() {
 		super();
 		this.img_bg = this.addResImage('./img/gamelayer.png');
@@ -32,20 +42,22 @@ class GameScene extends Scene {
 		this.img_block = this.addResImage('./img/block.png');
 		this.step = 0;
 		this.mode = 0;
+		this.field = new field();
 
 		this.next = new tetrimino();
-		this.next.offset_x = 442;
+		this.next.offset_x = 462;
 		this.next.offset_y = 81 + 20;
 		this.next.createNext();
 
 		this.stock = new tetrimino();
-		this.stock.offset_x = 82;
+		this.stock.offset_x = 102;
 		this.stock.offset_y = 81 + 20;
 
-		this.player = new tetrimino();
-		this.player.offset_x = 202;
+		this.player = new player();
+		this.player.offset_x = 222;
 		this.player.offset_y = 61;
-		this.player.createNext();
+		this.player.setMino( this.next.copy() );
+		this.next.createNext();
 	}
 
 	timerProc() {
@@ -57,13 +69,39 @@ class GameScene extends Scene {
 				}
 				break;
 
-			case 1:
+			case game_mode_wait:
 				this.step ++;
+				if( this.player.autoDown( this.field ) == false ) {
+					this.setNextMino();
+				}
 				if( this.step > 250 ) {
 					this.step -= 250;
 				}
 				break;
+
+			case game_mode_countdown:
+				break;
+
+			case game_mode_play:
+				break;
 		}
+	}
+
+	setNextMino() {
+		//プレイヤーブロックをフィールドにセット
+		let lines = this.field.setPlayer( this.player );
+		//TODO:得点加算
+		//次のブロックをプレイヤーにセット
+		this.player.setMino( this.next.copy() );
+		this.player.clearDown();
+		//ゲームオーバチェック
+		if( this.field.checkMove(this.player,5) == false ){
+			//TODO:ゲームオーバー処理
+			this.setMode( game_mode_gameover );
+			alert('game over');
+		}
+
+		this.next.createNext();
 	}
 
 	render( context ) {
@@ -83,15 +121,26 @@ class GameScene extends Scene {
 		if( this.mode == 1 ) {
 			switch( event.code ) {
 				case "ArrowLeft":
-					this.player.x -= 20;
+					this.player.moveLeft( this.field );
 					break;
 
 				case "ArrowRight":
-					this.player.x += 20;
+					this.player.moveRight( this.field );
 					break;
 
 				case "ArrowUp":
-					this.player.turnRight();
+					this.player.turnRight( this.field );
+					break;
+
+				case "ArrowDown":
+					if( this.player.moveDown( this.field ) == false ) {
+						this.setNextMino();
+					}
+					break;
+
+				case "Space":
+					this.player.dropDown( this.field );
+					this.setNextMino();
 					break;
 			}
 		}
@@ -104,7 +153,7 @@ class GameScene extends Scene {
 
 	/**
 	 * mode = 0 の描画処理
-	 * @param {*} context 
+	 * @param {context} context 
 	 */
 	start_fede( context ) {
 		//白塗り初期化
@@ -115,7 +164,7 @@ class GameScene extends Scene {
 		context.drawImage( this.getResImage( this.img_bg ), 0, 0 );
 	}
 
-		/**
+	/**
 	 * mode = 1の描画処理
 	 * @param {*} context 
 	 */
@@ -129,6 +178,7 @@ class GameScene extends Scene {
 		let img_bock = this.getResImage( this.img_block);
 		this.next.draw( context, img_bock );
 		this.player.draw( context, img_bock );
+		this.field.draw( context, img_bock );
 
 		if( this.step < 125  ) {
 			context.drawImage( this.getResImage( this.img_btnSpace ), 320-50, 240 );

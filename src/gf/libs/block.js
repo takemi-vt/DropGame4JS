@@ -52,4 +52,8 @@ class block {
 			console.log( foo );
 		}
 	}
+
+	getNode( x, y ) {
+
+	}
 }

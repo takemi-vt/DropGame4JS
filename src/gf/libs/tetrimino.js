@@ -57,6 +57,14 @@ class tetrimino {
 		this.type = 0;
 	}
 
+	getWidth() {
+		return this.buff.width;
+	}
+
+	getHeight() {
+		return this.buff.height;
+	}
+
 	/**
 	 * tetriminoクラスのコピー
 	 */
@@ -65,13 +73,20 @@ class tetrimino {
 		ret.block = this.block.copy();
 		ret.buff = this.buff.copy();
 		ret.rotate = this.rotate;
+		ret.x = this.x;
+		ret.y = this.y;
+		ret.offset_x = this.x;
+		ret.offset_y = this.y;
+		ret.type = this.type;
+		ret.img = this.img;
+		return ret;
 	}
 
 	/**
 	 * 次のブロックデータを作成
 	 */
 	createNext(){
-		this.type = Math.floor( Math.random() * 6 );
+		this.type = Math.floor( Math.random() * 6 ) + 1;
 		this.block = tetrimino.factory( this.type );
 		this.buff = this.block.copy();
 	}
@@ -127,7 +142,7 @@ class tetrimino {
 	static factory( type ) {
 		let ret = null;
 		if( !type ) {
-			type = Math.floor( Math.random() * 6 );
+			type = Math.floor( Math.random() * 6 ) + 1;
 		}
 
 		let n = 0;
@@ -190,7 +205,12 @@ class tetrimino {
 		return ret;
 	}
 
-	draw( handel, img ) {
+	/**
+	 * テトリスミノ描画処理
+	 * @param {context} handle 
+	 * @param {Image} img 
+	 */
+	draw( handle, img ) {
 		let wi = 20;
 		let hi = 20;
 		let dx = 20;
@@ -199,8 +219,8 @@ class tetrimino {
 		for( let y = 0; y < this.buff.height; y ++ ){
 			for( let x = 0; x < this.buff.width; x ++ ) {
 				if( this.buff.node[ x + ( y * this.buff.width)] ) {
-					handel.drawImage( img, dx, dy, wi, hi,
-						this.offset_x + this.x + (x * wi ),
+					handle.drawImage( img, dx, dy, wi, hi,
+						this.offset_x + this.x + ( x * wi ),
 						this.offset_y + this.y + ( y * hi ),
 						wi, hi
 					);
