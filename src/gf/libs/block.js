@@ -38,4 +38,18 @@ class block {
 		ret.setArray( this.node );
 		return ret;
 	}
+
+	dump(){
+		for( let y = 0; y < this.height; y ++ ){
+			let foo = "";
+			for( let x = 0; x < this.width; x ++ ) {
+				if( this.node[ x + ( y * this.width)] ) {
+					foo += "■";
+				} else {
+					foo += "□";
+				}
+			}
+			console.log( foo );
+		}
+	}
 }
