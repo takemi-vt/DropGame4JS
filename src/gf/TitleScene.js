@@ -55,11 +55,10 @@ class TitleScene extends Scene {
 	}
 
 	keydown( event ) {
-		console.log( event );
 		if( this.mode == 1 ) {
 			if( event.code == "Space" ) {
 				//次のシーンへ移動
-				//gf.setScene( new GameScene() );
+				gf.setScene( new GameScene() );
 			}
 		}
 	}

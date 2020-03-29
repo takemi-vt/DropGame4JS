@@ -49,6 +49,7 @@ class GameFrame {
 }
 
 var gf = new GameFrame( new TitleScene() );
+//var gf = new GameFrame( new GameScene() );
 
 /**
  * GameFrameタイマーイベントトリガー関数
