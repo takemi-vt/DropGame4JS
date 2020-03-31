@@ -1,14 +1,14 @@
 /**
- * 
+ * フィールドコントロールクラス
  */
 class field extends block {
 	offset_x = 0;
 	offset_y = 0;
 
 	constructor() {
-		super( 10, 21 );
+		super( 10, 20 );
 
-		this.offset_x = 222;
+		this.offset_x = 224;
 		this.offset_y = 61;
 	}
 
@@ -28,7 +28,6 @@ class field extends block {
 
 		//消す行検出、行を消す
 		let lines = this.checkLine();
-		//TODO::得点加算
 		this.removeLine( lines );
 
 		return lines;
@@ -114,11 +113,16 @@ class field extends block {
 				this.node[ x + (line * this.width )] = mino_none;
 			}
 			//行を詰める
-			for( let y = line; y > 1; y -- ) {
+			for( let y = line; y > 0; y -- ) {
 				for( let x = 0; x < this.width; x ++ ) {
 					this.node[ x + ( y * this.width) ] = this.node[ x + ( (y-1) * this.width)];
 				}
 			}
+		}
+
+		//一番上の行を0クリアする
+		for( let n = 0; n < this.width; n ++ ){
+			this.node[ n ] = mino_none;
 		}
 	}
 
