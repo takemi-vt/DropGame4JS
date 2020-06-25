@@ -48,7 +48,7 @@ class field extends block {
 
 			case 1: //left
 				px --;
-				if( px <= 0 ) return true;
+				if( px < 0 ) return true;
 				break;
 
 			case 2: //right
