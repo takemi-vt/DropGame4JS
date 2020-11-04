@@ -70,8 +70,8 @@ class tetrimino {
 	 */
 	copy(){
 		let ret = new tetrimino();
-		ret.block = this.block.copy();
-		ret.buff = this.buff.copy();
+		if( this.block ) ret.block = this.block.copy();
+		if( this.buff ) ret.buff = this.buff.copy();
 		ret.rotate = this.rotate;
 		ret.x = this.x;
 		ret.y = this.y;
@@ -89,6 +89,12 @@ class tetrimino {
 		this.type = Math.floor( Math.random() * 6 ) + 1;
 		this.block = tetrimino.factory( this.type );
 		this.buff = this.block.copy();
+	}
+
+	setBlockBuff( block, buff, type ) {
+		this.block = block;
+		this.buff = buff;
+		this.type = type;
 	}
 
 	/**
@@ -215,6 +221,8 @@ class tetrimino {
 		let hi = 20;
 		let dx = 20;
 		let dy = ( this.type - 1 ) * hi;
+
+		if( this.buff == null ) return;
 
 		for( let y = 0; y < this.buff.height; y ++ ){
 			for( let x = 0; x < this.buff.width; x ++ ) {

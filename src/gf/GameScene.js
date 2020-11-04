@@ -35,6 +35,18 @@ class GameScene extends Scene {
 	 */
 	field = null;
 
+	/**
+	 * ゲームオーバー時の背景ストック
+	 */
+	bg = null;
+
+	/**
+	 * レベル
+	 */
+	lv = 0;
+
+	score = 0;
+
 	constructor() {
 		super();
 		this.img_bg = this.addResImage('./img/gamelayer.png');
@@ -50,14 +62,15 @@ class GameScene extends Scene {
 		this.next.createNext();
 
 		this.stock = new tetrimino();
-		this.stock.offset_x = 102;
+		this.stock.offset_x = 82;
 		this.stock.offset_y = 81 + 20;
 
 		this.player = new player();
-		this.player.offset_x = 222;
+		this.player.offset_x = 224;
 		this.player.offset_y = 61;
-		this.player.setMino( this.next.copy() );
-		this.next.createNext();
+		this.setNextMino( true );
+
+		this.bg = null;
 	}
 
 	timerProc() {
@@ -84,24 +97,59 @@ class GameScene extends Scene {
 
 			case game_mode_play:
 				break;
+
+			case game_mode_gameover:
+				this.step ++;
+				if( this.step >= 500 ) {
+					//タイトルシーンへ遷移
+					gf.setScene( new TitleScene() )
+				}
+				break;
 		}
 	}
 
-	setNextMino() {
-		//プレイヤーブロックをフィールドにセット
-		let lines = this.field.setPlayer( this.player );
-		//TODO:得点加算
+	/**
+	 * 次のテトリスミノを生成
+	 */
+	setNextMino( flag = false) {
+		if( flag == false ) {
+			//プレイヤーブロックをフィールドにセット
+			let lines = this.field.setPlayer( this.player );
+			if( lines.length > 0 ) {
+				this.score += lines.length * 10;
+				//TODO:LVの設定
+				this.lv = Math.floor( this.score / 10 );
+				this.player.limit_now = 500 - this.score;
+			}
+		}
 		//次のブロックをプレイヤーにセット
 		this.player.setMino( this.next.copy() );
 		this.player.clearDown();
 		//ゲームオーバチェック
 		if( this.field.checkMove(this.player,5) == false ){
-			//TODO:ゲームオーバー処理
+			//ゲームオーバー処理
 			this.setMode( game_mode_gameover );
-			alert('game over');
 		}
 
 		this.next.createNext();
+		this.next.offset_x = 462 + 60 - ( this.next.getWidth() / 2 * 20);
+	}
+
+	setStock() {
+		let swap = this.stock.copy();
+
+		this.stock.setBlockBuff( this.player.mino.block, this.player.mino.buff, this.player.mino.type );
+		this.stock.offset_x = 62 + 60 - ( this.stock.getWidth() / 2 * 20 );
+
+		if( swap.block ) {
+			//Swapがある場合は、StockとPlayerのミノを入れ替える
+			this.player.setMino( swap );
+		} else {
+			//Swapがない場合は、次のミノを生成する
+			this.player.setMino( this.next.copy() );
+			this.next.createNext();
+			this.next.offset_x = 462 + 60 - ( this.next.getWidth() / 2 * 20);
+		}
 	}
 
 	render( context ) {
@@ -112,6 +160,10 @@ class GameScene extends Scene {
 
 			case 1:
 				this.button_wait( context );
+				break;
+
+			case game_mode_gameover :
+				this.game_over( context );
 				break;
 		}
 	}
@@ -141,6 +193,11 @@ class GameScene extends Scene {
 				case "Space":
 					this.player.dropDown( this.field );
 					this.setNextMino();
+					break;
+
+				case "ControlRight":
+				case "ControlLeft":
+					this.setStock();
 					break;
 			}
 		}
@@ -176,12 +233,41 @@ class GameScene extends Scene {
 		context.drawImage( this.getResImage( this.img_bg ), 0, 0 );
 
 		let img_bock = this.getResImage( this.img_block);
+
+		this.stock.draw( context, img_bock );
 		this.next.draw( context, img_bock );
 		this.player.draw( context, img_bock );
 		this.field.draw( context, img_bock );
 
+		//スコアの描画
+		context.font = "24px MeirioUi";
+		context.fillStyle = "rgb( 0, 0, 0 )";
+		context.fillText("SCORE: "+ this.score, 10, 24);
+
 		if( this.step < 125  ) {
 			context.drawImage( this.getResImage( this.img_btnSpace ), 320-50, 240 );
 		}
+	}
+
+	/**
+	 * 
+	 * @param {context} context 
+	 */
+	game_over ( context ) {
+		if( this.bg == null ) {
+			this.bg = context.getImageData( 0, 0, 640, 480 );
+		}
+
+		//背景初期化
+		context.putImageData( this.bg, 0, 0 );
+
+		context.globalAlpha =  (1.0/500) * this.step;
+		context.fillStyle = "rgb( 80, 80, 80 )";
+		context.fillRect( 0, 120, 640, 240 );
+
+
+		context.font = "84px MeirioUi";
+		context.fillStyle = "rgb( 255, 255, 255 )";
+		context.fillText("Game Over", 100, 260);
 	}
 }
